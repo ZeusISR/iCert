@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iCert</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* איפוס סגנונות */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Rubik', Arial, sans-serif;
+            direction: rtl;
+            text-align: right;
+            background-color: #f5f6fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* סרגל עליון - גובה קטן */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            height: 50px;
+        }
+
+        /* כפתור הרשמה קטן */
+        .navbar .register-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .navbar .register-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* המבורגר קטן */
+        .hamburger-menu {
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .bar {
+            width: 22px;
+            height: 2.5px;
+            background-color: #333;
+            margin: 3px 0;
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+
+        /* תפריט נגלל */
+        .mobile-menu {
+            position: fixed;
+            top: 50px;
+            right: -250px;
+            width: 250px;
+            height: 100vh;
+            background-color: #fff;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            transition: 0.3s;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            z-index: 1001;
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .menu-link {
+            color: #333;
+            text-decoration: none;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* כותרת עם תמונה */
+        .header {
+            position: relative;
+            height: 200px;
+            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+                            url('https://i.postimg.cc/LssJG9Mc/IMG-0686.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+
+        .header h1 {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            margin: 0;
+        }
+
+        /* תוכן ראשי */
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        /* טופס הרשמה */
+        .form-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .form-container.active {
+            display: block;
+        }
+
+        .form-close {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-container h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-container label {
+            display: block;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-weight: 500;
+        }
+
+        .form-container input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-container input:focus {
+            border-color: #1abc9c;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.2);
+        }
+
+        .form-container button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #1abc9c;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-container button[type="submit"]:hover {
+            background-color: #16a085;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .input-error {
+            border-color: #e74c3c !important;
+            background-color: #fee;
+        }
+
+        .form-message {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .error {
+            background-color: #fee;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+
+        .success {
+            background-color: #e8f6f3;
+            color: #1abc9c;
+            border: 1px solid #1abc9c;
+        }
+
+        /* footer */
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            background-color: #2c3e50;
+            color: white;
+            margin-top: auto;
+        }
+
+        .footer a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #bdc3c7;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: #1abc9c;
+        }
+
+        .footer button {
+            margin: 0 10px;
+            padding: 12px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 25px;
+            background-color: #1abc9c;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .footer button:hover {
+            background-color: #16a085;
+            transform: translateY(-2px);
+        }
+
+        .footer .rights {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <!-- סרגל עליון -->
+    <header class="navbar">
+        <button class="register-button" onclick="openRegistrationForm()">הרשמה</button>
+        
+        <div class="hamburger-menu">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+    </header>
+
+    <!-- תפריט נגלל -->
+    <div class="mobile-menu">
+        <a href="#" class="menu-link">ראשי</a>
+        <a href="#" class="menu-link">אודות</a>
+        <a href="#" class="menu-link">שירותים</a>
+        <a href="#" class="menu-link">צור קשר</a>
+    </div>
+
+    <!-- כותרת עם תמונה -->
+    <div class="header" role="banner" aria-label="כותרת האתר">
+        <h1></h1>
+    </div>
+
+    <!-- תוכן -->
+    <div class="content">
+        <div class="keywords">
+            <p>discover, use, sideloading</p>
+        </div>
+    </div>
+
+    <!-- footer -->
+    <div class="footer">
+        <a href="/terms">תקנון האתר</a>
+        <button onclick="window.location.href='/contact'">יצירת קשר</button>
+        <button onclick="window.location.href='/faq'">שאלות ותשובות</button>
+        <div class="rights">
+            <p>© כל הזכויות שמורות לiCert</p>
+        </div>
+    </div>
+
+    <!-- טופס הרשמה -->
+    <div class="form-container" id="registrationFormContainer">
+        <button class="form-close" onclick="closeRegistrationForm()">✖</button>
+        <h2>הרשמה למערכת</h2>
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="username">שם משתמש :</label>
+                <input type="text" id="username" name="username" required 
+                       pattern="^[A-Za-z]+$"
+                       oninput="validateUsername(this)">
+                <div class="error-message" id="usernameError">שם המשתמש חייב להיות באנגלית בלבד</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">אימייל:</label>
+                <input type="email" id="email" name="email" required 
+                       pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$">
+                <div class="error-message" id="emailError">נא להזין כתובת אימייל תקינה</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">סיסמה :</label>
+                <input type="password" id="password" name="password" required 
+                       pattern="^(?=.*[A-Za-z])(?=.*[!@#$%^&*])[A-Za-z!@#$%^&*]{5,}$"
+                       oninput="validatePassword(this)">
+                <div class="error-message" id="passwordError">חייב לכלול אותיות באנגלית, תו מיוחד ולפחות 5 תווים</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">אישור סיסמה:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required
+                       oninput="validatePasswordConfirmation(this)">
+                <div class="error-message" id="confirmPasswordError">הסיסמאות לא תואמות</div>
+            </div>
+            
+            <button type="submit">הרשמה</button>
+        </form>
+        <div class="form-message" id="formMessage"></div>
+    </div>
+
+    <script>
+        // ניהול תפריט המבורגר
+        document.querySelector('.hamburger-menu').addEventListener('click', function() {
+            this.classList.toggle('active');
+            document.querySelector('.mobile-menu').classList.toggle('active');
+        });
+
+        document.addEventListener('click', function(event) {
+            const hamburger = document.querySelector('.hamburger-menu');
+            const mobileMenu = document.querySelector('.mobile-menu');
+            
+            if (!hamburger.contains(event.target) && !mobileMenu.contains(event.target)) {
+                hamburger.classList.remove('active');
+                mobileMenu.classList.remove('active');
+            }
+        });
+
+        document.querySelectorAll('.menu-link').forEach(link => {
+            link.addEventListener('click', () => {
+                document.querySelector('.hamburger-menu').classList.remove('active');
+                document.querySelector('.mobile-menu').classList.remove('active');
+            });
+        });
+
+        // ניהול טופס הרשמה
+        function openRegistrationForm() {
+            document.getElementById('registrationFormContainer').classList.add('active');
+        }
+
+        function closeRegistrationForm() {
+            document.getElementById('registrationFormContainer').classList.remove('active');
+            resetFormErrors();
+        }
+
+        function validateUsername(input) {
+            const errorElement = document.getElementById('usernameError');
+            const isValid = /^[A-Za-z]+$/.test(input.value);
+            
+            if (!isValid && input.value.length > 0) {
+                showInputError(input, errorElement);
+                return false;
+            }
+            clearInputError(input, errorElement);
+            return true;
+        }
+
+        function validatePassword(input) {
+            const errorElement = document.getElementById('passwordError');
+            const isValid = /^(?=.*[A-Za-z])(?=.*[!@#$%^&*])[A-Za-z!@#$%^&*]{5,}$/.test(input.value);
+            
+            if (!isValid && input.value.length > 0) {
+                showInputError(input, errorElement);
+                return false;
+            }
+            clearInputError(input, errorElement);
+            return true;
+        }
+
+        function validatePasswordConfirmation(input) {
+            const password = document.getElementById('password').value;
+            const errorElement = document.getElementById('confirmPasswordError');
+            
+            if (input.value !== password && input.value.length > 0) {
+                showInputError(input, errorElement);
+                return false;
+            }
+            clearInputError(input, errorElement);
+            return true;
+        }
+
+        function showInputError(input, errorElement) {
+            input.classList.add('input-error');
+            errorElement.style.display = 'block';
+        }
+
+        function clearInputError(input, errorElement) {
+            input.classList.remove('input-error');
+            errorElement.style.display = 'none';
+        }
+
+        function resetFormErrors() {
+            document.querySelectorAll('.input-error').forEach(input => {
+                input.classList.remove('input-error');
+            });
+            document.querySelectorAll('.error-message').forEach(error => {
+                error.style.display = 'none';
+            });
+            document.getElementById('formMessage').className = '';
+            document.getElementById('formMessage').textContent = '';
+        }
+
+        document.getElementById('registrationForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const formMessage = document.getElementById('formMessage');
+            formMessage.className = '';
+            formMessage.textContent = '';
+
+            const isUsernameValid = validateUsername(document.getElementById('username'));
+            const isPasswordValid = validatePassword(document.getElementById('password'));
+            const isConfirmationValid = validatePasswordConfirmation(document.getElementById('confirmPassword'));
+
+            if (!isUsernameValid || !isPasswordValid || !isConfirmationValid) {
+                showError('נא לתקן את השדות המסומנים');
+                return;
+            }
+
+            setTimeout(() => {
+                showSuccess('ההרשמה בוצעה בהצלחה! נא לבדוק את האימייל שלך לאימות');
+                document.getElementById('registrationForm').reset();
+                setTimeout(closeRegistrationForm, 3000);
+            }, 1000);
+        });
+
+        function showError(message) {
+            const formMessage = document.getElementById('formMessage');
+            formMessage.className = 'error';
+            formMessage.textContent = message;
+        }
+
+        function showSuccess(message) {
+            const formMessage = document.getElementById('formMessage');
+            formMessage.className = 'success';
+            formMessage.textContent = message;
+        }
+
+        window.onclick = function(event) {
+            const formContainer = document.getElementById('registrationFormContainer');
+            if (event.target === formContainer) {
+                closeRegistrationForm();
+            }
+        }
+    </script>
+</body>
+</html>
